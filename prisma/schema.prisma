@@ -21,6 +21,9 @@ model User {
   updated_at  DateTime @default(now())
   deleted_at DateTime?
 
+  movie Movie @relation(fields: [favorite_movie], references: [id])
+  favorite_movie String
+
   ratings Rating[]
 
   @@map("users")
@@ -32,8 +35,10 @@ model Movie {
   direction String
   budget Float
   launched_at DateTime
+  genre String
   mean_rating Float @default(0)
 
+  users User[]
   raings Rating[]
 
   @@map("movies")
