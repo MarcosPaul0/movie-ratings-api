@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -9,6 +9,28 @@ export class UsersService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create({ username, email, password }: CreateUserDto): Promise<User> {
+    const userAlreadyExists = await this.prismaService.user.findFirst({
+      where: { email },
+    });
+
+    if (userAlreadyExists) {
+      if (userAlreadyExists.deleted_at) {
+        const userDisabled = await this.prismaService.user.update({
+          where: { email },
+          data: {
+            deleted_at: null,
+          },
+        });
+
+        return userDisabled;
+      }
+
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'User already exists',
+      });
+    }
+
     const newUser = await this.prismaService.user.create({
       data: {
         username,
