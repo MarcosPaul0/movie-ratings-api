@@ -21,8 +21,8 @@ model User {
   updated_at  DateTime @default(now())
   deleted_at DateTime?
 
-  movie Movie @relation(fields: [favorite_movie], references: [id])
-  favorite_movie String
+  movie Movie? @relation(fields: [favorite_movie], references: [id])
+  favorite_movie String?
 
   ratings Rating[]
 
