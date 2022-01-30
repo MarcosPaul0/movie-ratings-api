@@ -1,34 +1,85 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpStatus,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { NestResponse } from 'src/core/http/nestResponse';
+import { NestResponseBuilder } from 'src/core/http/nestReponseBuilder';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto): Promise<NestResponse> {
+    const newUser = await this.usersService.create(createUserDto);
+
+    const response = new NestResponseBuilder()
+      .setStatus(HttpStatus.CREATED)
+      .setHeaders({ Location: `/users/${newUser.id}` })
+      .setBody(newUser)
+      .build();
+
+    return response;
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  async findAll(): Promise<NestResponse> {
+    const allUsers = await this.usersService.findAll();
+
+    const response = new NestResponseBuilder()
+      .setStatus(HttpStatus.OK)
+      .setBody(allUsers)
+      .build();
+
+    return response;
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<NestResponse> {
+    const user = await this.usersService.findById(id);
+
+    const response = new NestResponseBuilder()
+      .setStatus(HttpStatus.OK)
+      .setBody(user)
+      .build();
+
+    return response;
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<NestResponse> {
+    const updatedUser = await this.usersService.update(id, updateUserDto);
+
+    const response = new NestResponseBuilder()
+      .setStatus(HttpStatus.OK)
+      .setHeaders({ Location: `/users/${updatedUser.id}` })
+      .setBody(updatedUser)
+      .build();
+
+    return response;
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  async remove(@Param('id') id: string): Promise<NestResponse> {
+    const deletedUser = await this.usersService.remove(id);
+
+    const response = new NestResponseBuilder()
+      .setStatus(HttpStatus.OK)
+      .setBody(deletedUser)
+      .build();
+
+    return response;
   }
 }

@@ -74,7 +74,7 @@ export class UsersService {
   ): Promise<User> {
     const user = await this.prismaService.user.findFirst({
       where: {
-        email,
+        id,
         deleted_at: {
           not: null,
         },
@@ -89,7 +89,7 @@ export class UsersService {
     }
 
     const updatedUser = await this.prismaService.user.update({
-      where: { email },
+      where: { id },
       data: {
         username,
         email,
