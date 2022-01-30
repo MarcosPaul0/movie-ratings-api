@@ -68,11 +68,37 @@ export class UsersService {
     return user;
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(
+    id: string,
+    { username, email, password }: UpdateUserDto,
+  ): Promise<User> {
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        email,
+        deleted_at: {
+          not: null,
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'User not found',
+      });
+    }
+
+    const updatedUser = await this.prismaService.user.update({
+      where: { email },
+      data: {
+        username,
+        email,
+        password,
+      },
+    });
+
+    return updatedUser;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
+  async remove(id: number): Promise<User> {}
 }
