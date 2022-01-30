@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { AbstractHttpAdapter, HttpAdapterHost } from '@nestjs/core';
 
-@Catch(HttpException)
+@Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   private httpAdapter: AbstractHttpAdapter;
 
@@ -15,16 +15,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
     this.httpAdapter = adapterHost.httpAdapter;
   }
 
-  catch(exception: any, host: ArgumentsHost) {
+  catch(exception: Error, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const request = ctx.getRequest();
-    const response = exception.getResponse();
+    const response = ctx.getResponse();
 
     const { status, body } =
       exception instanceof HttpException
         ? {
             status: exception.getStatus(),
-            body: response,
+            body: exception.getResponse(),
           }
         : {
             status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -36,6 +36,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
             },
           };
 
-    this.httpAdapter.reply(status, response, body);
+    this.httpAdapter.reply(response, body, status);
   }
 }

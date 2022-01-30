@@ -27,7 +27,7 @@ export class NestResponseInterceptor implements NestInterceptor {
           const response = ctx.getResponse();
           const { status, headers, body } = controllerResponse;
 
-          const headersName = headers.getOwnPropertyNames(headers);
+          const headersName = Object.getOwnPropertyNames(headers);
 
           headersName.forEach((header: string) => {
             const headerValue = headers[header];

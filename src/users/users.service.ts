@@ -75,9 +75,7 @@ export class UsersService {
     const user = await this.prismaService.user.findFirst({
       where: {
         id,
-        deleted_at: {
-          not: null,
-        },
+        deleted_at: null,
       },
     });
 
