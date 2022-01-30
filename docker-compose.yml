@@ -1,0 +1,26 @@
+version: '3.3'
+
+services:
+  db:
+    image: postgres
+    container_name: postgres_container
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - /var/lib/postgresql/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: 123
+
+  app:
+    image: movie_rating
+    container_name: movie_rating_container
+    ports:
+      - 3333:3333
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:123@postgres_container:5432/movies_ratings
+
+volumes:
+  pgdata:
