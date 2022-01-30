@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './users/users.module';
-import { MoviesModule } from './movies/movies.module';
-import { RatingsModule } from './ratings/ratings.module';
+import { UsersModule } from './models/users/users.module';
+import { MoviesModule } from './models/movies/movies.module';
+import { RatingsModule } from './models/ratings/ratings.module';
 import { PrismaService } from './prisma/prisma.service';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { NestResponseInterceptor } from './core/http/nestResponse.interceptor';

@@ -11,8 +11,8 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { NestResponse } from 'src/core/http/nestResponse';
-import { NestResponseBuilder } from 'src/core/http/nestReponseBuilder';
+import { NestResponse } from '../../core/http/nestResponse';
+import { NestResponseBuilder } from '../../core/http/nestReponseBuilder';
 
 @Controller('users')
 export class UsersController {
