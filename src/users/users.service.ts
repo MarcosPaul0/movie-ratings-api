@@ -100,5 +100,19 @@ export class UsersService {
     return updatedUser;
   }
 
-  async remove(id: number): Promise<User> {}
+  async remove(id: string): Promise<User> {
+    try {
+      const deletedUser = await this.prismaService.user.update({
+        where: { id },
+        data: { deleted_at: new Date() },
+      });
+
+      return deletedUser;
+    } catch (error) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'User not found',
+      });
+    }
+  }
 }
