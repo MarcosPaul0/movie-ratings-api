@@ -13,8 +13,11 @@ services:
       POSTGRES_PASSWORD: 123
 
   app:
-    image: movie_rating
+    build: .
     container_name: movie_rating_container
+    restart: always
+    volumes:
+      - .:/urs/app
     ports:
       - 3333:3333
     depends_on:
