@@ -7,12 +7,14 @@ import {
   Param,
   Delete,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { NestResponse } from '../../core/http/nestResponse';
 import { NestResponseBuilder } from '../../core/http/nestReponseBuilder';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
 @Controller('users')
 export class UsersController {
@@ -31,6 +33,7 @@ export class UsersController {
     return response;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(): Promise<NestResponse> {
     const allUsers = await this.usersService.findAll();
@@ -43,6 +46,7 @@ export class UsersController {
     return response;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<NestResponse> {
     const user = await this.usersService.findById(id);
@@ -55,6 +59,7 @@ export class UsersController {
     return response;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -71,6 +76,7 @@ export class UsersController {
     return response;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<NestResponse> {
     const deletedUser = await this.usersService.remove(id);
