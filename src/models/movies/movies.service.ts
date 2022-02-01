@@ -1,11 +1,4 @@
-import {
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-  UseGuards,
-} from '@nestjs/common';
-import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
-import { RoleGuard } from '../../auth/guards/role.guard';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
@@ -15,8 +8,6 @@ import { Movie } from './entities/movie.entity';
 export class MoviesService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  @UseGuards(RoleGuard)
-  @UseGuards(JwtAuthGuard)
   async create({
     name,
     direction,
@@ -37,16 +28,12 @@ export class MoviesService {
     return newMovie;
   }
 
-  @UseGuards(RoleGuard)
-  @UseGuards(JwtAuthGuard)
   async findAll(): Promise<Movie[]> {
     const allMovies = await this.prismaService.movie.findMany();
 
     return allMovies;
   }
 
-  @UseGuards(RoleGuard)
-  @UseGuards(JwtAuthGuard)
   async findByName(name: string): Promise<Movie[]> {
     const movies = await this.prismaService.movie.findMany({
       where: {
@@ -64,8 +51,6 @@ export class MoviesService {
     return movies;
   }
 
-  @UseGuards(RoleGuard)
-  @UseGuards(JwtAuthGuard)
   async update(
     id: string,
     { name, genre, direction, launched_at, budget }: UpdateMovieDto,
