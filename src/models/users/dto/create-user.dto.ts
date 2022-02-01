@@ -6,18 +6,18 @@ export class CreateUserDto {
   username: string;
 
   @IsNotEmpty({
-    message: 'Username is missing',
+    message: 'Email is missing',
   })
   @IsEmail(
     {},
     {
-      message: 'Email is missing',
+      message: 'Email invalid',
     },
   )
   email: string;
 
   @IsNotEmpty({
-    message: 'Username is missing',
+    message: 'Password is missing',
   })
   password: string;
 }
