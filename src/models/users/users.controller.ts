@@ -15,7 +15,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { NestResponse } from '../../core/http/nestResponse';
-import { NestResponseBuilder } from '../../core/http/nestReponseBuilder';
+import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
 @Controller('users')
@@ -49,6 +49,7 @@ export class UsersController {
     return response;
   }
 
+  @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<NestResponse> {
@@ -62,6 +63,7 @@ export class UsersController {
     return response;
   }
 
+  @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
@@ -79,6 +81,7 @@ export class UsersController {
     return response;
   }
 
+  @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<NestResponse> {
