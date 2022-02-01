@@ -8,6 +8,7 @@ interface UserRequestData {
   user: {
     id: string;
     email: string;
+    is_admin: boolean;
   };
 }
 @Controller()
@@ -20,6 +21,7 @@ export class AuthController {
     const token = await this.authService.login({
       id: user.id,
       email: user.email,
+      is_admin: user.is_admin,
     });
 
     const response = new NestResponseBuilder()

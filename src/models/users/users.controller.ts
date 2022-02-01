@@ -1,3 +1,4 @@
+import { RoleGuard } from '../../auth/guards/role.guard';
 import {
   Controller,
   Get,
@@ -8,6 +9,7 @@ import {
   Delete,
   HttpStatus,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -33,6 +35,7 @@ export class UsersController {
     return response;
   }
 
+  @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(): Promise<NestResponse> {
