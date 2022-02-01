@@ -28,19 +28,23 @@ export class MoviesService {
     return newMovie;
   }
 
-  async findAll() {
-    return `This action returns all movies`;
+  async findAll(): Promise<Movie[]> {
+    const allMovies = await this.prismaService.movie.findMany();
+
+    return allMovies;
   }
 
-  async findOne(id: number) {
-    return `This action returns a #${id} movie`;
+  async findByName(name: string): Promise<Movie[]> {
+    const movies = await this.prismaService.movie.findMany({
+      where: {
+        name,
+      },
+    });
+
+    return movies;
   }
 
-  async update(id: number, updateMovieDto: UpdateMovieDto) {
+  async update(id: number, updateMovieDto: UpdateMovieDto): Promise<Movie> {
     return `This action updates a #${id} movie`;
-  }
-
-  async remove(id: number) {
-    return `This action removes a #${id} movie`;
   }
 }
