@@ -37,6 +37,7 @@ model Movie {
   launched_at DateTime
   genre String
   mean_rating Float @default(0)
+  created_at DateTime @default(now())
 
   users User[]
   raings Rating[]
@@ -47,6 +48,8 @@ model Movie {
 model Rating {
   id String @id() @default(uuid())
   score Float
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
 
   movie Movie @relation(fields: [movie_id], references: [id])
   movie_id String
