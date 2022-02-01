@@ -10,8 +10,8 @@ import {
 import { MoviesService } from './movies.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
-import { NestResponse } from 'src/core/http/nestResponse';
-import { NestResponseBuilder } from 'src/core/http/nestResponseBuilder';
+import { NestResponse } from '../../core/http/nestResponse';
+import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
 
 @Controller('movies')
 export class MoviesController {

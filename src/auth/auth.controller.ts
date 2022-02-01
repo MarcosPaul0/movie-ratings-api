@@ -1,5 +1,5 @@
 import { Controller, Post, UseGuards, Req, HttpStatus } from '@nestjs/common';
-import { NestResponseBuilder } from 'src/core/http/nestResponseBuilder';
+import { NestResponseBuilder } from '../core/http/nestResponseBuilder';
 import { NestResponse } from '../core/http/nestResponse';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local.guard';
