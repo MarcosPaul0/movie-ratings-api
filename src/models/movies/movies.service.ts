@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
@@ -44,7 +44,22 @@ export class MoviesService {
     return movies;
   }
 
-  async update(id: number, updateMovieDto: UpdateMovieDto): Promise<Movie> {
-    return `This action updates a #${id} movie`;
+  async update(
+    id: string,
+    { name, genre, direction, launched_at, budget }: UpdateMovieDto,
+  ): Promise<Movie> {
+    try {
+      const updatedMovie = await this.prismaService.movie.update({
+        where: { id },
+        data: { name, genre, direction, launched_at, budget },
+      });
+
+      return updatedMovie;
+    } catch (error) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Movie not found',
+      });
+    }
   }
 }
