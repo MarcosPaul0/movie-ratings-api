@@ -1,3 +1,4 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import {
   BadRequestException,
   HttpStatus,
@@ -12,7 +13,10 @@ import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly mailerService: MailerService,
+  ) {}
 
   async create({ username, email, password }: CreateUserDto): Promise<User> {
     const userAlreadyExists = await this.prismaService.user.findFirst({
@@ -46,6 +50,8 @@ export class UsersService {
         password: passwordHash,
       },
     });
+
+    this.sendActiveAccountMail({ email, username });
 
     return newUser;
   }
@@ -117,5 +123,23 @@ export class UsersService {
         message: 'User not found',
       });
     }
+  }
+
+  sendActiveAccountMail({ email, username }) {
+    try {
+      this.mailerService.sendMail({
+        to: email,
+        from: 'teste.de.email.sender@gmail.com',
+        subject: 'Teste de email',
+        template: '../mail/template/confirmation',
+        context: {
+          name: username,
+          url: 'https://localhost:3333',
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
+    return;
   }
 }
