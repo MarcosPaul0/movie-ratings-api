@@ -1,4 +1,3 @@
-import { MailerService } from '@nestjs-modules/mailer';
 import {
   BadRequestException,
   HttpStatus,
@@ -6,7 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { hash } from 'bcryptjs';
-import { PrismaService } from '../../prisma/prisma.service';
+import { AuthService } from 'src/auth/auth.service';
+import { PrismaService } from '../../utils/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -15,7 +15,7 @@ import { User } from './entities/user.entity';
 export class UsersService {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly mailerService: MailerService,
+    private readonly authService: AuthService,
   ) {}
 
   async create({ username, email, password }: CreateUserDto): Promise<User> {
@@ -51,7 +51,11 @@ export class UsersService {
       },
     });
 
-    this.sendActiveAccountMail({ email, username });
+    this.authService.sendConfirmationAccountMail({
+      id: newUser.id,
+      email,
+      username,
+    });
 
     return newUser;
   }
@@ -123,23 +127,5 @@ export class UsersService {
         message: 'User not found',
       });
     }
-  }
-
-  sendActiveAccountMail({ email, username }) {
-    try {
-      this.mailerService.sendMail({
-        to: email,
-        from: 'teste.de.email.sender@gmail.com',
-        subject: 'Teste de email',
-        template: '../mail/template/confirmation',
-        context: {
-          name: username,
-          url: 'https://localhost:3333',
-        },
-      });
-    } catch (error) {
-      console.log(error);
-    }
-    return;
   }
 }
