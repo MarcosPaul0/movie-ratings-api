@@ -20,7 +20,7 @@ import { MailService } from './utils/mail.service';
     AuthModule,
     MailerModule.forRoot({
       transport: {
-        host: 'smtp.gmail.com',
+        host: process.env.EMAIL_HOST,
         port: 587,
         secure: false,
         auth: {
@@ -29,7 +29,7 @@ import { MailService } from './utils/mail.service';
         },
       },
       defaults: {
-        from: '"Teste de Email" <teste.de.email.sender@gmail.com>',
+        from: `"Teste de Email" <${process.env.EMAIL_LOGIN}>`,
       },
       template: {
         dir: __dirname + '/mail/templates',
