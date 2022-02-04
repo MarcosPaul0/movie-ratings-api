@@ -7,6 +7,9 @@ import { LoginUserDto } from './dto/loginUser.dto';
 import { CreateAuthDto } from './dto/authenticateUser.dto';
 import { MailService } from 'src/utils/mail.service';
 
+interface ITokenPayload {
+  sub: string;
+}
 @Injectable()
 export class AuthService {
   constructor(
@@ -73,6 +76,18 @@ export class AuthService {
 
       return validatedUser;
     } catch (error) {
+      const { sub } = this.jwtService.decode(token) as ITokenPayload;
+
+      const user = await this.prismaService.user.findFirst({
+        where: { id: sub },
+      });
+
+      this.sendConfirmationAccountMail({
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      });
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: 'Invalid confirmation',

@@ -15,8 +15,10 @@ import { LocalAuthGuard } from './guards/local.guard';
 interface UserRequestData {
   user: {
     id: string;
+    username: string;
     email: string;
     is_admin: boolean;
+    is_active: boolean;
   };
 }
 @Controller()
