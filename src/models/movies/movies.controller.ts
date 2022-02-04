@@ -16,12 +16,12 @@ import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
 import { RoleGuard } from '../../auth/guards/role.guard';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
 
+@UseGuards(RoleGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('movies')
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
 
-  @UseGuards(RoleGuard)
-  @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() createMovieDto: CreateMovieDto): Promise<NestResponse> {
     const newMovie = await this.moviesService.create(createMovieDto);
@@ -35,8 +35,6 @@ export class MoviesController {
     return response;
   }
 
-  @UseGuards(RoleGuard)
-  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(): Promise<NestResponse> {
     const allMovies = await this.moviesService.findAll();
@@ -49,8 +47,6 @@ export class MoviesController {
     return response;
   }
 
-  @UseGuards(RoleGuard)
-  @UseGuards(JwtAuthGuard)
   @Get(':name')
   async findByName(@Body('name') id: string): Promise<NestResponse> {
     const movies = await this.moviesService.findByName(id);
@@ -63,8 +59,6 @@ export class MoviesController {
     return response;
   }
 
-  @UseGuards(RoleGuard)
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
