@@ -19,7 +19,7 @@ model User {
   is_admin Boolean @default(false)
   is_active Boolean @default(false)
   created_at DateTime @default(now())
-  updated_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt()
   deleted_at DateTime?
 
   movie Movie? @relation(fields: [favorite_movie], references: [id])
@@ -37,8 +37,10 @@ model Movie {
   budget Float
   launched_at DateTime
   genre String
+  total_ratings Int @default(0)
   mean_rating Float @default(0)
   created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
 
   users User[]
   raings Rating[]
@@ -50,13 +52,15 @@ model Rating {
   id String @id() @default(uuid())
   score Float
   created_at DateTime @default(now())
-  updated_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
 
   movie Movie @relation(fields: [movie_id], references: [id])
   movie_id String
 
   user User @relation(fields: [user_id], references: [id])
   user_id String
+
+  @@unique([movie_id, user_id])
 
   @@map("ratings")
 }
