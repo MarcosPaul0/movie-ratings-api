@@ -10,7 +10,7 @@ import {
 import { NestResponseBuilder } from '../core/http/nestResponseBuilder';
 import { NestResponse } from '../core/http/nestResponse';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './guards/local.guard';
+import { LocalAuthGuard } from '../guards/local.guard';
 
 interface UserRequestData {
   user: {
@@ -32,6 +32,7 @@ export class AuthController {
       id: user.id,
       email: user.email,
       is_admin: user.is_admin,
+      is_active: user.is_active,
     });
 
     const response = new NestResponseBuilder()

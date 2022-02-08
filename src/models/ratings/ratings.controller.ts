@@ -1,3 +1,4 @@
+import { ActiveGuard } from '../../guards/active.guard';
 import {
   Controller,
   Get,
@@ -15,8 +16,7 @@ import { CreateRatingDto } from './dto/create-rating.dto';
 import { UpdateRatingDto } from './dto/update-rating.dto';
 import { NestResponse } from 'src/core/http/nestResponse';
 import { NestResponseBuilder } from 'src/core/http/nestResponseBuilder';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
-
+import { JwtAuthGuard } from 'src/guards/jwt.guard';
 interface UserRequestData {
   user: {
     id: string;
@@ -26,6 +26,7 @@ interface UserRequestData {
     is_active: boolean;
   };
 }
+@UseGuards(ActiveGuard)
 @UseGuards(JwtAuthGuard)
 @Controller('ratings')
 export class RatingsController {
@@ -90,8 +91,13 @@ export class RatingsController {
   async update(
     @Param('id') id: string,
     @Body() updateRatingDto: UpdateRatingDto,
+    @Req() { user }: UserRequestData,
   ): Promise<NestResponse> {
-    const updatedRating = await this.ratingsService.update(id, updateRatingDto);
+    const updatedRating = await this.ratingsService.update(
+      user,
+      id,
+      updateRatingDto,
+    );
 
     const response = new NestResponseBuilder()
       .setStatus(HttpStatus.CREATED)

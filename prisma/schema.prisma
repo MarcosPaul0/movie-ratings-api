@@ -37,8 +37,8 @@ model Movie {
   budget Float
   launched_at DateTime
   genre String
-  total_ratings Int @default(0)
-  mean_rating Float @default(0)
+  total_number_ratings Int @default(0)
+  total_rating Float @default(0)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
 

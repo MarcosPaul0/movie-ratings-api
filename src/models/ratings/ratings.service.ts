@@ -8,7 +8,13 @@ import { PrismaService } from '../../utils/prisma.service';
 import { CreateRatingDto } from './dto/create-rating.dto';
 import { UpdateRatingDto } from './dto/update-rating.dto';
 import { Rating } from './entities/rating.entity';
-
+interface UserRequestData {
+  id: string;
+  username: string;
+  email: string;
+  is_admin: boolean;
+  is_active: boolean;
+}
 @Injectable()
 export class RatingsService {
   constructor(private readonly prismaService: PrismaService) {}
@@ -20,6 +26,18 @@ export class RatingsService {
           score,
           user_id,
           movie_id,
+        },
+      });
+
+      await this.prismaService.movie.update({
+        where: { id: movie_id },
+        data: {
+          total_number_ratings: {
+            increment: 1,
+          },
+          total_rating: {
+            increment: score,
+          },
         },
       });
 
@@ -64,20 +82,41 @@ export class RatingsService {
     return rating;
   }
 
-  async update(id: string, updateRatingDto: UpdateRatingDto): Promise<Rating> {
-    try {
-      const updatedRating = await this.prismaService.rating.update({
-        where: { id },
-        data: updateRatingDto,
-      });
+  async update(
+    user: UserRequestData,
+    id: string,
+    { score }: UpdateRatingDto,
+  ): Promise<Rating> {
+    const rating = await this.prismaService.rating.findFirst({
+      where: {
+        id,
+        user_id: user.id,
+      },
+    });
 
-      return updatedRating;
-    } catch (error) {
+    if (!rating) {
       throw new NotFoundException({
         statusCode: HttpStatus.NOT_FOUND,
         message: 'Rating not found',
       });
     }
+
+    const updatedRating = await this.prismaService.rating.update({
+      where: { id },
+      data: { score },
+    });
+
+    await this.prismaService.movie.update({
+      where: { id },
+      data: {
+        total_rating: {
+          decrement: rating.score,
+          increment: score,
+        },
+      },
+    });
+
+    return updatedRating;
   }
 
   async remove(id: string): Promise<void> {

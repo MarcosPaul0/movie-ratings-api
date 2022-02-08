@@ -1,4 +1,4 @@
-import { RoleGuard } from '../../auth/guards/role.guard';
+import { RoleGuard } from '../../guards/role.guard';
 import {
   Controller,
   Get,
@@ -15,7 +15,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { NestResponse } from '../../core/http/nestResponse';
 import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
-import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
+import { JwtAuthGuard } from '../../guards/jwt.guard';
+import { ActiveGuard } from 'src/guards/active.guard';
 
 @Controller('users')
 export class UsersController {
@@ -35,6 +36,7 @@ export class UsersController {
   }
 
   @UseGuards(RoleGuard)
+  @UseGuards(ActiveGuard)
   @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(): Promise<NestResponse> {

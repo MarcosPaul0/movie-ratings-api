@@ -13,9 +13,8 @@ import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { NestResponse } from '../../core/http/nestResponse';
 import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
-import { RoleGuard } from '../../auth/guards/role.guard';
-import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
-
+import { RoleGuard } from '../../guards/role.guard';
+import { JwtAuthGuard } from '../../guards/jwt.guard';
 @UseGuards(RoleGuard)
 @UseGuards(JwtAuthGuard)
 @Controller('movies')

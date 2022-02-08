@@ -39,8 +39,8 @@ export class AuthService {
     return user;
   }
 
-  async login({ id, email, is_admin }: LoginUserDto) {
-    const token = this.jwtService.sign({ sub: id, email, is_admin });
+  async login({ id, email, is_admin, is_active }: LoginUserDto) {
+    const token = this.jwtService.sign({ sub: id, email, is_admin, is_active });
 
     return { token };
   }

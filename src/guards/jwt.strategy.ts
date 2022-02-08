@@ -6,6 +6,7 @@ interface JwtPayload {
   sub: string;
   email: string;
   is_admin: boolean;
+  is_active: boolean;
 }
 
 @Injectable()
@@ -23,6 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       id: payload.sub,
       email: payload.email,
       is_admin: payload.is_admin,
+      is_active: payload.is_active,
     };
   }
 }
