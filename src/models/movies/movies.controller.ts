@@ -15,6 +15,10 @@ import { NestResponse } from '../../core/http/nestResponse';
 import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
 import { RoleGuard } from '../../guards/role.guard';
 import { JwtAuthGuard } from '../../guards/jwt.guard';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+
+@ApiTags('Movies')
+@ApiBearerAuth()
 @UseGuards(RoleGuard)
 @UseGuards(JwtAuthGuard)
 @Controller('movies')

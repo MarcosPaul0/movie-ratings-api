@@ -11,6 +11,7 @@ import { NestResponseBuilder } from '../core/http/nestResponseBuilder';
 import { NestResponse } from '../core/http/nestResponse';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../guards/local.guard';
+import { ApiTags } from '@nestjs/swagger';
 
 interface UserRequestData {
   user: {
@@ -21,6 +22,8 @@ interface UserRequestData {
     is_active: boolean;
   };
 }
+
+@ApiTags('Auth')
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

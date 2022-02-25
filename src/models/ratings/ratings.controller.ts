@@ -17,6 +17,8 @@ import { UpdateRatingDto } from './dto/update-rating.dto';
 import { NestResponse } from 'src/core/http/nestResponse';
 import { NestResponseBuilder } from 'src/core/http/nestResponseBuilder';
 import { JwtAuthGuard } from 'src/guards/jwt.guard';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+
 interface UserRequestData {
   user: {
     id: string;
@@ -26,6 +28,9 @@ interface UserRequestData {
     is_active: boolean;
   };
 }
+
+@ApiTags('Ratings')
+@ApiBearerAuth()
 @UseGuards(ActiveGuard)
 @UseGuards(JwtAuthGuard)
 @Controller('ratings')

@@ -17,7 +17,9 @@ import { NestResponse } from '../../core/http/nestResponse';
 import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
 import { JwtAuthGuard } from '../../guards/jwt.guard';
 import { ActiveGuard } from 'src/guards/active.guard';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -52,6 +54,7 @@ export class UsersController {
 
   @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<NestResponse> {
     const user = await this.usersService.findById(id);
@@ -66,6 +69,7 @@ export class UsersController {
 
   @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -84,6 +88,7 @@ export class UsersController {
 
   @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<NestResponse> {
     const deletedUser = await this.usersService.remove(id);
