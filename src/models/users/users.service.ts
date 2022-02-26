@@ -25,14 +25,23 @@ export class UsersService {
 
     if (userAlreadyExists) {
       if (userAlreadyExists.deleted_at) {
-        const userDisabled = await this.prismaService.user.update({
+        const activeUser = await this.prismaService.user.update({
           where: { email },
           data: {
+            username,
+            email,
+            password,
             deleted_at: null,
           },
         });
 
-        return new User(userDisabled);
+        this.authService.sendConfirmationAccountMail({
+          id: activeUser.id,
+          email,
+          username,
+        });
+
+        return new User(activeUser);
       }
 
       throw new BadRequestException({
