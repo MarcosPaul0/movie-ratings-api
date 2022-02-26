@@ -4,9 +4,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { hash } from 'bcryptjs';
+import { EncryptData } from '../../utils/encrypt-data';
 import { AuthService } from '../../auth/auth.service';
-import { PrismaService } from '../../utils/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -16,6 +16,7 @@ export class UsersService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly authService: AuthService,
+    private readonly encryptData: EncryptData,
   ) {}
 
   async create({ username, email, password }: CreateUserDto): Promise<User> {
@@ -50,13 +51,11 @@ export class UsersService {
       });
     }
 
-    const passwordHash = await hash(password, 10);
-
     const newUser = await this.prismaService.user.create({
       data: {
         username,
         email,
-        password: passwordHash,
+        password,
       },
     });
 
@@ -108,7 +107,9 @@ export class UsersService {
       });
     }
 
-    const passwordHash = password ? await hash(password, 10) : undefined;
+    const passwordHash = password
+      ? await this.encryptData.encrypt(password, 10)
+      : undefined;
 
     const updatedUser = await this.prismaService.user.update({
       where: { id },

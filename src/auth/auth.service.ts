@@ -1,11 +1,11 @@
-import { PrismaService } from '../utils/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
-import { compare } from 'bcryptjs';
 import { User } from '../models/users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from './dto/loginUser.dto';
 import { CreateAuthDto } from './dto/authenticateUser.dto';
-import { MailService } from '../utils/mail.service';
+import { MailService } from '../mail/mail.service';
+import { EncryptData } from '../utils/encrypt-data';
 
 interface ITokenPayload {
   sub: string;
@@ -16,6 +16,7 @@ export class AuthService {
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly encryptDate: EncryptData,
   ) {}
 
   async authenticate({
@@ -30,7 +31,10 @@ export class AuthService {
       return false;
     }
 
-    const passwordHasMatch = await compare(password, user.password);
+    const passwordHasMatch = await this.encryptDate.decrypt(
+      password,
+      user.password,
+    );
 
     if (!passwordHasMatch) {
       return false;

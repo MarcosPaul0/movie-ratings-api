@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { PrismaService } from '../../utils/prisma.service';
-import { AuthService } from 'src/auth/auth.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { AuthService } from '../../auth/auth.service';
 import { JwtModule } from '@nestjs/jwt';
-import { MailService } from 'src/utils/mail.service';
+import { MailService } from '../../mail/mail.service';
+import { EncryptData } from '../../utils/encrypt-data';
+import { PasswordPipe } from './password.pipe';
 
 @Module({
   imports: [
@@ -14,6 +16,14 @@ import { MailService } from 'src/utils/mail.service';
     }),
   ],
   controllers: [UsersController],
-  providers: [UsersService, PrismaService, AuthService, MailService, JwtModule],
+  providers: [
+    UsersService,
+    PrismaService,
+    AuthService,
+    MailService,
+    JwtModule,
+    EncryptData,
+    PasswordPipe,
+  ],
 })
 export class UsersModule {}

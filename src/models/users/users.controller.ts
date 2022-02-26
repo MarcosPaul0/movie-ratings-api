@@ -18,6 +18,7 @@ import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
 import { JwtAuthGuard } from '../../guards/jwt.guard';
 import { ActiveGuard } from '../../guards/active.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { PasswordPipe } from './password.pipe';
 
 @ApiTags('Users')
 @Controller('users')
@@ -25,7 +26,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  async create(@Body() createUserDto: CreateUserDto): Promise<NestResponse> {
+  async create(
+    @Body(PasswordPipe) createUserDto: CreateUserDto,
+  ): Promise<NestResponse> {
     const newUser = await this.usersService.create(createUserDto);
 
     const response = new NestResponseBuilder()

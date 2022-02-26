@@ -5,10 +5,11 @@ import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { LocalAuthGuard } from '../guards/local.guard';
-import { PrismaService } from '../utils/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { LocalStrategy } from '../guards/local.strategy';
 import { JwtStrategy } from '../guards/jwt.strategy';
-import { MailService } from 'src/utils/mail.service';
+import { MailService } from '../mail/mail.service';
+import { EncryptData } from '../utils/encrypt-data';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MailService } from 'src/utils/mail.service';
     JwtStrategy,
     JwtAuthGuard,
     MailService,
+    EncryptData,
   ],
 })
 export class AuthModule {}
