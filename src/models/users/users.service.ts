@@ -126,7 +126,7 @@ export class UsersService {
     try {
       const deletedUser = await this.prismaService.user.update({
         where: { id },
-        data: { deleted_at: new Date() },
+        data: { deleted_at: new Date(), is_active: false },
       });
 
       return new User(deletedUser);
