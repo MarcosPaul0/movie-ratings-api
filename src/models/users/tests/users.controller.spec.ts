@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { EncryptData } from '../../../utils/encrypt-data';
 import { UsersController } from '../users.controller';
 import { UsersService } from '../users.service';
 import {
@@ -30,6 +31,15 @@ describe('UsersController', () => {
             findAll: jest.fn().mockReturnValue([mockCreateUserReturnService]),
             update: jest.fn().mockReturnValue(mockUpdateUserReturnService),
             remove: jest.fn().mockReturnValue(mockRemoveUserReturnService),
+          },
+        },
+        {
+          provide: EncryptData,
+          useValue: {
+            encrypt: jest
+              .fn()
+              .mockReturnValue(mockCreateUserReturnService.password),
+            decrypt: jest.fn().mockReturnValue(true),
           },
         },
       ],

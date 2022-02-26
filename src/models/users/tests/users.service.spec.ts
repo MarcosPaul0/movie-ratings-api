@@ -1,7 +1,8 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { EncryptData } from '../../../utils/encrypt-data';
 import { AuthService } from '../../../auth/auth.service';
-import { PrismaService } from '../../../utils/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 import { UsersService } from '../users.service';
 import {
   mockCreateUserInput,
@@ -37,6 +38,15 @@ describe('UsersService', () => {
           provide: AuthService,
           useValue: {
             sendConfirmationAccountMail: jest.fn(),
+          },
+        },
+        {
+          provide: EncryptData,
+          useValue: {
+            encrypt: jest
+              .fn()
+              .mockReturnValue(mockCreateUserReturnService.password),
+            decrypt: jest.fn().mockReturnValue(true),
           },
         },
       ],
