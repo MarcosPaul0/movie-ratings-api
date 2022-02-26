@@ -5,13 +5,14 @@ import { NestResponseInterceptor } from './core/http/nestResponse.interceptor';
 import { HttpExceptionFilter } from './common/filters/httpException.filter';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
-import { PrismaService } from './utils/prisma.service';
+import { PrismaService } from './prisma/prisma.service';
 import { UsersModule } from './models/users/users.module';
 import { MoviesModule } from './models/movies/movies.module';
 import { RatingsModule } from './models/ratings/ratings.module';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { MailService } from './utils/mail.service';
+import { MailService } from './mail/mail.service';
+
 @Module({
   imports: [
     UsersModule,
