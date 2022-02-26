@@ -16,7 +16,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { NestResponse } from '../../core/http/nestResponse';
 import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
 import { JwtAuthGuard } from '../../guards/jwt.guard';
-import { ActiveGuard } from 'src/guards/active.guard';
+import { ActiveGuard } from '../../guards/active.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Users')
@@ -52,7 +52,6 @@ export class UsersController {
     return response;
   }
 
-  @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get(':id')
