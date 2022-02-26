@@ -1,7 +1,10 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 export class CreateUserDto {
   @IsNotEmpty({
     message: 'Username is missing',
+  })
+  @IsString({
+    message: 'Invalid username is format',
   })
   username: string;
 
@@ -18,6 +21,9 @@ export class CreateUserDto {
 
   @IsNotEmpty({
     message: 'Password is missing',
+  })
+  @IsString({
+    message: 'Invalid password is format',
   })
   password: string;
 }
