@@ -5,7 +5,7 @@ import { User } from '../models/users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from './dto/loginUser.dto';
 import { CreateAuthDto } from './dto/authenticateUser.dto';
-import { MailService } from 'src/utils/mail.service';
+import { MailService } from '../utils/mail.service';
 
 interface ITokenPayload {
   sub: string;

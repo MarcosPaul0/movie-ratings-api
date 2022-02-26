@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { hash } from 'bcryptjs';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from '../../auth/auth.service';
 import { PrismaService } from '../../utils/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -32,7 +32,7 @@ export class UsersService {
           },
         });
 
-        return userDisabled;
+        return new User(userDisabled);
       }
 
       throw new BadRequestException({
@@ -57,13 +57,13 @@ export class UsersService {
       username,
     });
 
-    return newUser;
+    return new User(newUser);
   }
 
   async findAll(): Promise<User[]> {
     const allUsers = await this.prismaService.user.findMany();
 
-    return allUsers;
+    return allUsers.map((user) => new User(user));
   }
 
   async findById(id: string): Promise<User> {
@@ -78,7 +78,7 @@ export class UsersService {
       });
     }
 
-    return user;
+    return new User(user);
   }
 
   async update(
@@ -99,7 +99,7 @@ export class UsersService {
       });
     }
 
-    const passwordHash = await hash(password, 10);
+    const passwordHash = password ? await hash(password, 10) : undefined;
 
     const updatedUser = await this.prismaService.user.update({
       where: { id },
@@ -110,7 +110,7 @@ export class UsersService {
       },
     });
 
-    return updatedUser;
+    return new User(updatedUser);
   }
 
   async remove(id: string): Promise<User> {
@@ -120,7 +120,7 @@ export class UsersService {
         data: { deleted_at: new Date() },
       });
 
-      return deletedUser;
+      return new User(deletedUser);
     } catch (error) {
       throw new NotFoundException({
         statusCode: HttpStatus.NOT_FOUND,
