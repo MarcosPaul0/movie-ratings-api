@@ -12,6 +12,7 @@ import { NestResponse } from '../core/http/nestResponse';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../guards/local.guard';
 import { ApiTags } from '@nestjs/swagger';
+import { ActiveGuard } from 'src/guards/active.guard';
 
 interface UserRequestData {
   user: {
@@ -28,6 +29,7 @@ interface UserRequestData {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @UseGuards(ActiveGuard)
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Req() { user }: UserRequestData): Promise<NestResponse> {
