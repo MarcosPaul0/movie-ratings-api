@@ -14,9 +14,9 @@ import {
 import { RatingsService } from './ratings.service';
 import { CreateRatingDto } from './dto/create-rating.dto';
 import { UpdateRatingDto } from './dto/update-rating.dto';
-import { NestResponse } from 'src/core/http/nestResponse';
-import { NestResponseBuilder } from 'src/core/http/nestResponseBuilder';
-import { JwtAuthGuard } from 'src/guards/jwt.guard';
+import { NestResponse } from '../../core/http/nestResponse';
+import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
+import { JwtAuthGuard } from '../../guards/jwt.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 interface UserRequestData {
@@ -114,10 +114,16 @@ export class RatingsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<NestResponse> {
-    await this.ratingsService.remove(id);
+  async remove(
+    @Param('id') id: string,
+    @Req() { user }: UserRequestData,
+  ): Promise<NestResponse> {
+    const deletedRating = await this.ratingsService.remove(id, user.id);
 
-    const response = new NestResponseBuilder().setStatus(HttpStatus.OK).build();
+    const response = new NestResponseBuilder()
+      .setStatus(HttpStatus.OK)
+      .setBody(deletedRating)
+      .build();
 
     return response;
   }
