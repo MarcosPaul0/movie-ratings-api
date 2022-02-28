@@ -2,8 +2,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from '../models/users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { LoginUserDto } from './dto/loginUser.dto';
-import { CreateAuthDto } from './dto/authenticateUser.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { CreateAuthDto } from './dto/authenticate-user.dto';
 import { MailService } from '../mail/mail.service';
 import { EncryptData } from '../utils/encrypt-data';
 
@@ -78,7 +78,7 @@ export class AuthService {
         data: { is_active: true },
       });
 
-      return validatedUser;
+      return new User(validatedUser);
     } catch (error) {
       const { sub } = this.jwtService.decode(token) as ITokenPayload;
 
