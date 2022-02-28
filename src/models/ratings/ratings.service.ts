@@ -20,40 +20,69 @@ export class RatingsService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create({ score, user_id, movie_id }: CreateRatingDto): Promise<Rating> {
-    try {
-      const newRating = await this.prismaService.rating.create({
-        data: {
-          score,
-          user_id,
-          movie_id,
-        },
-      });
+    const ratingAlreadyExists = await this.prismaService.rating.findFirst({
+      where: { user_id, movie_id },
+    });
 
-      await this.prismaService.movie.update({
-        where: { id: movie_id },
-        data: {
-          total_number_ratings: {
-            increment: 1,
+    if (ratingAlreadyExists) {
+      if (ratingAlreadyExists.deleted_at) {
+        const newRating = await this.prismaService.rating.update({
+          where: { id: ratingAlreadyExists.id },
+          data: {
+            score,
+            user_id,
+            movie_id,
+            deleted_at: null,
           },
-          total_rating: {
-            increment: score,
-          },
-        },
-      });
+        });
 
-      return newRating;
-    } catch (error) {
+        await this.prismaService.movie.update({
+          where: { id: movie_id },
+          data: {
+            total_rating: {
+              decrement: ratingAlreadyExists.score,
+              increment: score,
+            },
+          },
+        });
+
+        return newRating;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: 'Rating already exists',
       });
     }
+
+    const newRating = await this.prismaService.rating.create({
+      data: {
+        score,
+        user_id,
+        movie_id,
+      },
+    });
+
+    await this.prismaService.movie.update({
+      where: { id: movie_id },
+      data: {
+        total_number_ratings: {
+          increment: 1,
+        },
+        total_rating: {
+          increment: score,
+        },
+      },
+    });
+
+    return newRating;
   }
 
   async findByUserId(user_id: string): Promise<Rating[]> {
     const allRatings = await this.prismaService.rating.findMany({
       where: {
         user_id: user_id,
+        deleted_at: null,
       },
     });
 
@@ -69,7 +98,7 @@ export class RatingsService {
 
   async findOne(id: string): Promise<Rating> {
     const rating = await this.prismaService.rating.findFirst({
-      where: { id },
+      where: { id, deleted_at: null },
     });
 
     if (!rating) {
@@ -91,6 +120,7 @@ export class RatingsService {
       where: {
         id,
         user_id: user.id,
+        deleted_at: null,
       },
     });
 
@@ -119,16 +149,35 @@ export class RatingsService {
     return updatedRating;
   }
 
-  async remove(id: string): Promise<void> {
-    try {
-      await this.prismaService.rating.delete({
-        where: { id },
-      });
-    } catch (error) {
+  async remove(id: string, user_id: string): Promise<Rating> {
+    const rating = await this.prismaService.rating.findFirst({
+      where: { id, user_id, deleted_at: null },
+    });
+
+    if (!rating) {
       throw new NotFoundException({
         statusCode: HttpStatus.NOT_FOUND,
         message: 'Rating not found',
       });
     }
+
+    const deletedRating = await this.prismaService.rating.update({
+      where: { id },
+      data: { deleted_at: new Date() },
+    });
+
+    await this.prismaService.movie.update({
+      where: { id },
+      data: {
+        total_number_ratings: {
+          decrement: 1,
+        },
+        total_rating: {
+          decrement: rating.score,
+        },
+      },
+    });
+
+    return deletedRating;
   }
 }
