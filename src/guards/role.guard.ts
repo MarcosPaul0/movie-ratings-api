@@ -6,12 +6,6 @@ interface UserRequestData {
     email: string;
     is_admin: boolean;
   };
-  body: {
-    id?: string;
-  };
-  params: {
-    id?: string;
-  };
 }
 
 export class RoleGuard implements CanActivate {
@@ -20,10 +14,6 @@ export class RoleGuard implements CanActivate {
     const user = request.user;
 
     if (user?.is_admin) {
-      return true;
-    }
-
-    if (user?.id === request.params.id || user?.id === request.body.id) {
       return true;
     }
 
