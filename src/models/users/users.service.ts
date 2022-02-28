@@ -69,14 +69,16 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    const allUsers = await this.prismaService.user.findMany();
+    const allUsers = await this.prismaService.user.findMany({
+      where: { deleted_at: null },
+    });
 
     return allUsers.map((user) => new User(user));
   }
 
   async findById(id: string): Promise<User> {
     const user = await this.prismaService.user.findFirst({
-      where: { id },
+      where: { id, deleted_at: null },
     });
 
     if (!user) {
