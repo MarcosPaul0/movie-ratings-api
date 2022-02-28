@@ -7,6 +7,7 @@ import {
   Param,
   HttpStatus,
   UseGuards,
+  Delete,
 } from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
@@ -73,6 +74,18 @@ export class MoviesController {
       .setStatus(HttpStatus.OK)
       .setHeaders({ Location: `/movies/${updatedMovie.name}` })
       .setBody(updatedMovie)
+      .build();
+
+    return response;
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string): Promise<NestResponse> {
+    const deletedMovie = await this.moviesService.remove(id);
+
+    const response = new NestResponseBuilder()
+      .setStatus(HttpStatus.OK)
+      .setBody(deletedMovie)
       .build();
 
     return response;
