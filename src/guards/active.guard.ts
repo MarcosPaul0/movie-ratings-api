@@ -1,22 +1,34 @@
-import { CanActivate, ExecutionContext } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 
 interface UserRequestData {
   user: {
     id: string;
     email: string;
+    username: string;
     is_active: boolean;
     is_admin: boolean;
   };
 }
 
+@Injectable()
 export class ActiveGuard implements CanActivate {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<UserRequestData>();
-    const user = request.user;
+    const { is_active } = request.user;
 
-    return user.is_active;
+    if (!is_active) {
+      throw new ForbiddenException({
+        statusCode: HttpStatus.FORBIDDEN,
+        message: 'Account is not activated',
+      });
+    }
+
+    return is_active;
   }
 }

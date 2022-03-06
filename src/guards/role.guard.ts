@@ -1,22 +1,34 @@
-import { CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 
 interface UserRequestData {
   user: {
     id: string;
     email: string;
+    username: string;
+    is_active: boolean;
     is_admin: boolean;
   };
 }
 
+@Injectable()
 export class RoleGuard implements CanActivate {
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<UserRequestData>();
-    const user = request.user;
+    const { is_admin } = request.user;
 
-    if (user?.is_admin) {
-      return true;
+    if (!is_admin) {
+      throw new ForbiddenException({
+        statusCode: HttpStatus.FORBIDDEN,
+        message: 'You have invalid role',
+      });
     }
 
-    return false;
+    return is_admin;
   }
 }
