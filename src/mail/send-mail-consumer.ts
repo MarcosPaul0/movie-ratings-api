@@ -1,5 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable } from '@nestjs/common';
+import { Process, Processor } from '@nestjs/bull';
+import { Job } from 'bull';
 
 interface SendConfirmationMailDto {
   email: string;
@@ -7,12 +8,15 @@ interface SendConfirmationMailDto {
   url: string;
 }
 
-@Injectable()
-export class MailService {
+@Processor('mail-queue')
+export class SendMailConsumer {
   constructor(private readonly mailerService: MailerService) {}
 
-  sendConfirmationMail({ email, name, url }: SendConfirmationMailDto) {
-    this.mailerService.sendMail({
+  @Process('send-mail-job')
+  async sendConfirmationMailConsumer(job: Job<SendConfirmationMailDto>) {
+    const { email, name, url } = job.data;
+
+    await this.mailerService.sendMail({
       to: email,
       from: process.env.EMAIL_LOGIN,
       subject: 'Movie Rating | Confirmação',
