@@ -8,8 +8,10 @@ import { LocalAuthGuard } from '../guards/local.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { LocalStrategy } from '../guards/local.strategy';
 import { JwtStrategy } from '../guards/jwt.strategy';
-import { MailService } from '../mail/mail.service';
 import { EncryptData } from '../utils/encrypt-data';
+import { SendMailService } from 'src/mail/send-mail.service';
+import { BullModule } from '@nestjs/bull';
+import { ActiveGuard } from 'src/guards/active.guard';
 
 @Module({
   imports: [
@@ -17,6 +19,9 @@ import { EncryptData } from '../utils/encrypt-data';
     JwtModule.register({
       secret: process.env.SECRET_TOKEN_KEY,
       signOptions: { expiresIn: '1d' },
+    }),
+    BullModule.registerQueue({
+      name: 'mail-queue',
     }),
   ],
   controllers: [AuthController],
@@ -27,8 +32,9 @@ import { EncryptData } from '../utils/encrypt-data';
     LocalAuthGuard,
     JwtStrategy,
     JwtAuthGuard,
-    MailService,
     EncryptData,
+    SendMailService,
+    ActiveGuard,
   ],
 })
 export class AuthModule {}

@@ -4,9 +4,11 @@ import { UsersController } from './users.controller';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuthService } from '../../auth/auth.service';
 import { JwtModule } from '@nestjs/jwt';
-import { MailService } from '../../mail/mail.service';
 import { EncryptData } from '../../utils/encrypt-data';
 import { PasswordPipe } from './password.pipe';
+import { SendMailService } from 'src/mail/send-mail.service';
+import { BullModule } from '@nestjs/bull';
+import { RoleGuard } from 'src/guards/role.guard';
 
 @Module({
   imports: [
@@ -14,16 +16,20 @@ import { PasswordPipe } from './password.pipe';
       secret: process.env.SECRET_TOKEN_KEY,
       signOptions: { expiresIn: '1d' },
     }),
+    BullModule.registerQueue({
+      name: 'mail-queue',
+    }),
   ],
   controllers: [UsersController],
   providers: [
     UsersService,
     PrismaService,
     AuthService,
-    MailService,
     JwtModule,
     EncryptData,
     PasswordPipe,
+    SendMailService,
+    RoleGuard,
   ],
 })
 export class UsersModule {}
