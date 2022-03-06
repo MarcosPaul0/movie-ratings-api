@@ -11,6 +11,21 @@ services:
       - /var/lib/postgresql/data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: 123
+    networks:
+      - app-net
+
+  redis:
+    image: redis
+    container_name: redis_container
+    restart: always
+    command: redis-server --requirepass 123
+    hostname: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - /var/lib/redis/data:/bitnami/redis/data
+    networks:
+      - app-net
 
   app:
     build: .
@@ -25,6 +40,13 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:123@postgres_container:5432/movies_ratings
       SECRET_TOKEN_KEY: ab73bb5bcbdf28acacfeebfef9dc7fb1
+    networks:
+      - app-net
 
 volumes:
   pgdata:
+  redis:
+
+networks:
+  app-net:
+    driver: bridge
