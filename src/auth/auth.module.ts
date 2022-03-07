@@ -12,6 +12,7 @@ import { EncryptData } from '../utils/encrypt-data';
 import { SendMailService } from 'src/mail/send-mail.service';
 import { BullModule } from '@nestjs/bull';
 import { ActiveGuard } from 'src/guards/active.guard';
+import { UsersRepository } from 'src/models/users/repository/user.repository';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ActiveGuard } from 'src/guards/active.guard';
     EncryptData,
     SendMailService,
     ActiveGuard,
+    UsersRepository,
   ],
 })
 export class AuthModule {}

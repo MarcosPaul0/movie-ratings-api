@@ -4,7 +4,7 @@ import { User } from '../models/users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from './dto/login-user.dto';
 import { CreateAuthDto } from './dto/authenticate-user.dto';
-import { MailService } from '../mail/mail.service';
+import { SendMailService } from '../mail/send-mail.service';
 import { EncryptData } from '../utils/encrypt-data';
 
 interface ITokenPayload {
@@ -15,7 +15,7 @@ export class AuthService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
-    private readonly mailService: MailService,
+    private readonly sendMailService: SendMailService,
     private readonly encryptDate: EncryptData,
   ) {}
 
@@ -40,23 +40,37 @@ export class AuthService {
       return false;
     }
 
+    if (!user.is_active) {
+      this.sendConfirmationAccountMail({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      });
+    }
+
     return user;
   }
 
-  async login({ id, email, is_admin, is_active }: LoginUserDto) {
-    const token = this.jwtService.sign({ sub: id, email, is_admin, is_active });
+  async login({ id, username, email, is_admin, is_active }: LoginUserDto) {
+    const token = this.jwtService.sign({
+      sub: id,
+      username,
+      email,
+      is_admin,
+      is_active,
+    });
 
     return { token };
   }
 
-  sendConfirmationAccountMail({ id, email, username }) {
+  async sendConfirmationAccountMail({ id, username, email }) {
     const token = this.jwtService.sign(
       { sub: id },
       { secret: process.env.EMAIL_SECRET_TOKEN_KEY, expiresIn: '1h' },
     );
 
     try {
-      this.mailService.sendConfirmationMail({
+      await this.sendMailService.sendConfirmationMail({
         email,
         name: username,
         url: `${process.env.APPLICATION_DOMAIN}/confirm/${token}`,
@@ -67,7 +81,9 @@ export class AuthService {
     return;
   }
 
-  async receivedConfirmationAccountMail(token: string): Promise<User> {
+  async receivedConfirmationAccountMail(
+    token: string,
+  ): Promise<{ user: User; message: string }> {
     try {
       const { sub } = await this.jwtService.verify(token, {
         secret: process.env.EMAIL_SECRET_TOKEN_KEY,
@@ -78,7 +94,12 @@ export class AuthService {
         data: { is_active: true },
       });
 
-      return new User(validatedUser);
+      const user = new User(validatedUser);
+
+      return {
+        user,
+        message: 'Email has confirmed',
+      };
     } catch (error) {
       const { sub } = this.jwtService.decode(token) as ITokenPayload;
 

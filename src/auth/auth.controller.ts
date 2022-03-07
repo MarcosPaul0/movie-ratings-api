@@ -12,9 +12,9 @@ import { NestResponse } from '../core/http/nestResponse';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../guards/local.guard';
 import { ApiTags } from '@nestjs/swagger';
-import { ActiveGuard } from 'src/guards/active.guard';
+import { ActiveGuard } from '../guards/active.guard';
 
-interface UserRequestData {
+export interface IUserRequestData {
   user: {
     id: string;
     username: string;
@@ -32,13 +32,8 @@ export class AuthController {
   @UseGuards(ActiveGuard)
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Req() { user }: UserRequestData): Promise<NestResponse> {
-    const token = await this.authService.login({
-      id: user.id,
-      email: user.email,
-      is_admin: user.is_admin,
-      is_active: user.is_active,
-    });
+  async login(@Req() { user }: IUserRequestData): Promise<NestResponse> {
+    const token = await this.authService.login(user);
 
     const response = new NestResponseBuilder()
       .setStatus(HttpStatus.OK)
@@ -52,13 +47,13 @@ export class AuthController {
   async receivedConfirmationAccountMail(
     @Param('token') token: string,
   ): Promise<NestResponse> {
-    const validatedUser =
+    const activeUserResponse =
       await this.authService.receivedConfirmationAccountMail(token);
 
     const response = new NestResponseBuilder()
       .setStatus(HttpStatus.OK)
-      .setHeaders({ Location: `/users/${validatedUser.id}` })
-      .setBody(validatedUser)
+      .setHeaders({ Location: `/users/${activeUserResponse.user.id}` })
+      .setBody(activeUserResponse)
       .build();
 
     return response;
