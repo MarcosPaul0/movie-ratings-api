@@ -14,9 +14,10 @@ import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { NestResponse } from '../../core/http/nestResponse';
 import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
-import { RoleGuard } from '../../guards/role.guard';
 import { JwtAuthGuard } from '../../guards/jwt.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { RoleGuard } from 'src/guards/role.guard';
+import { FindByNameDto } from './dto/find-by-name.dto';
 
 @ApiTags('Movies')
 @ApiBearerAuth()
@@ -51,9 +52,9 @@ export class MoviesController {
     return response;
   }
 
-  @Get(':name')
-  async findByName(@Body('name') id: string): Promise<NestResponse> {
-    const movies = await this.moviesService.findByName(id);
+  @Get('one')
+  async findByName(@Body() { name }: FindByNameDto): Promise<NestResponse> {
+    const movies = await this.moviesService.findByName(name);
 
     const response = new NestResponseBuilder()
       .setStatus(HttpStatus.OK)

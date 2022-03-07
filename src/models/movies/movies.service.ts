@@ -22,9 +22,9 @@ export class MoviesService {
   }: CreateMovieDto): Promise<Movie> {
     const movieAlreadyExists = await this.prismaService.movie.findFirst({
       where: {
-        name,
+        name: name.toLowerCase(),
         direction,
-        launched_at,
+        launched_at: new Date(launched_at),
         deleted_at: null,
       },
     });
@@ -38,7 +38,7 @@ export class MoviesService {
 
     const newMovie = await this.prismaService.movie.create({
       data: {
-        name,
+        name: name.toLowerCase(),
         direction,
         genre,
         budget,
@@ -60,12 +60,14 @@ export class MoviesService {
   async findByName(name: string): Promise<Movie[]> {
     const movies = await this.prismaService.movie.findMany({
       where: {
-        name,
+        name: {
+          contains: name.toLowerCase(),
+        },
         deleted_at: null,
       },
     });
 
-    if (!movies) {
+    if (movies.length === 0 || !movies) {
       throw new NotFoundException({
         statusCode: HttpStatus.NOT_FOUND,
         message: 'Movie not found',
@@ -92,7 +94,13 @@ export class MoviesService {
 
     const updatedMovie = await this.prismaService.movie.update({
       where: { id },
-      data: { name, genre, direction, launched_at, budget },
+      data: {
+        name: name?.toLowerCase(),
+        genre,
+        direction,
+        launched_at,
+        budget,
+      },
     });
 
     return updatedMovie;
