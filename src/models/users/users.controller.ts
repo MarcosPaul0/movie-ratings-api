@@ -1,4 +1,3 @@
-import { RoleGuard } from '../../guards/role.guard';
 import {
   Controller,
   Get,
@@ -9,6 +8,7 @@ import {
   Delete,
   HttpStatus,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,6 +18,8 @@ import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
 import { JwtAuthGuard } from '../../guards/jwt.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { PasswordPipe } from './password.pipe';
+import { RoleGuard } from 'src/guards/role.guard';
+import { IUserRequestData } from 'src/auth/auth.controller';
 
 @ApiTags('Users')
 @Controller('users')
@@ -39,8 +41,8 @@ export class UsersController {
     return response;
   }
 
-  @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
+  @UseGuards(RoleGuard)
   @Get()
   async findAll(): Promise<NestResponse> {
     const allUsers = await this.usersService.findAll();
@@ -54,14 +56,13 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<NestResponse> {
-    const user = await this.usersService.findById(id);
+  @Get('/me')
+  async findMe(@Req() { user }: IUserRequestData): Promise<NestResponse> {
+    const userFound = await this.usersService.findById(user.id);
 
     const response = new NestResponseBuilder()
       .setStatus(HttpStatus.OK)
-      .setBody(user)
+      .setBody(userFound)
       .build();
 
     return response;
@@ -70,6 +71,20 @@ export class UsersController {
   @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<NestResponse> {
+    const userFound = await this.usersService.findById(id);
+
+    const response = new NestResponseBuilder()
+      .setStatus(HttpStatus.OK)
+      .setBody(userFound)
+      .build();
+
+    return response;
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -86,9 +101,8 @@ export class UsersController {
     return response;
   }
 
-  @UseGuards(RoleGuard)
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<NestResponse> {
     const deletedUser = await this.usersService.remove(id);

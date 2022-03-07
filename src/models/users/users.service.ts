@@ -36,7 +36,7 @@ export class UsersService {
           },
         });
 
-        this.authService.sendConfirmationAccountMail({
+        await this.authService.sendConfirmationAccountMail({
           id: activeUser.id,
           email,
           username,
@@ -59,7 +59,7 @@ export class UsersService {
       },
     });
 
-    this.authService.sendConfirmationAccountMail({
+    await this.authService.sendConfirmationAccountMail({
       id: newUser.id,
       email,
       username,
