@@ -1,4 +1,4 @@
-import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateMovieDto {
   @IsNotEmpty({
@@ -42,7 +42,7 @@ export class CreateMovieDto {
   @IsNotEmpty({
     message: 'Launched date is missing',
   })
-  @IsDate({
+  @IsString({
     message: 'Field launched_at is invalid format',
   })
   launched_at: Date;

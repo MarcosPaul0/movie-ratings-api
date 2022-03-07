@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class CreateRatingDto {
   @IsNotEmpty({
@@ -13,6 +20,12 @@ export class CreateRatingDto {
       message: 'Field score is invalid format',
     },
   )
+  @Min(0, {
+    message: 'Score must be at least 0',
+  })
+  @Max(10, {
+    message: 'Score must be at most 10',
+  })
   score: number;
 
   @IsNotEmpty({

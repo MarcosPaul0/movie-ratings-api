@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, Max, Min } from 'class-validator';
 
 export class UpdateRatingDto {
   @IsNotEmpty({
@@ -13,5 +13,11 @@ export class UpdateRatingDto {
       message: 'Field score is invalid format',
     },
   )
+  @Min(0, {
+    message: 'Score must be at least 0',
+  })
+  @Max(10, {
+    message: 'Score must be at most 10',
+  })
   score: number;
 }
