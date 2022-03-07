@@ -20,6 +20,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       });
     }
 
-    return user;
+    return new User(user);
   }
 }

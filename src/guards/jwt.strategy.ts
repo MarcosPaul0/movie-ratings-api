@@ -1,9 +1,11 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
+import { UsersRepository } from 'src/models/users/repository/user.repository';
 
-interface JwtPayload {
+export interface IJwtPayload {
   sub: string;
+  username: string;
   email: string;
   is_admin: boolean;
   is_active: boolean;
@@ -11,7 +13,7 @@ interface JwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private readonly usersRepository: UsersRepository) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -19,12 +21,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload) {
+  async validate({ sub }: IJwtPayload) {
+    const { id, username, email, is_admin, is_active } =
+      await this.usersRepository.findById(sub);
+
     return {
-      id: payload.sub,
-      email: payload.email,
-      is_admin: payload.is_admin,
-      is_active: payload.is_active,
+      id,
+      username,
+      email,
+      is_admin,
+      is_active,
     };
   }
 }
