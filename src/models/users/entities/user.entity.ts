@@ -10,6 +10,7 @@ export class User {
 
   avatar_url: string;
   is_admin: boolean;
+  is_active: boolean;
   favorite_movie: string;
   created_at: Date;
   updated_at?: Date;
