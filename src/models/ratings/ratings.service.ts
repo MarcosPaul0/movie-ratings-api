@@ -40,7 +40,6 @@ export class RatingsService {
           where: { id: movie_id },
           data: {
             total_rating: {
-              decrement: ratingAlreadyExists.score,
               increment: score,
             },
           },
@@ -86,7 +85,7 @@ export class RatingsService {
       },
     });
 
-    if (!allRatings) {
+    if (allRatings.length === 0 || !allRatings) {
       throw new NotFoundException({
         statusCode: HttpStatus.NOT_FOUND,
         message: 'Rating not found',
@@ -109,6 +108,14 @@ export class RatingsService {
     }
 
     return rating;
+  }
+
+  async findAll(): Promise<Rating[]> {
+    const allRatings = this.prismaService.rating.findMany({
+      where: { deleted_at: null },
+    });
+
+    return allRatings;
   }
 
   async update(
@@ -137,11 +144,10 @@ export class RatingsService {
     });
 
     await this.prismaService.movie.update({
-      where: { id },
+      where: { id: rating.movie_id },
       data: {
         total_rating: {
-          decrement: rating.score,
-          increment: score,
+          increment: score - rating.score,
         },
       },
     });
@@ -167,7 +173,7 @@ export class RatingsService {
     });
 
     await this.prismaService.movie.update({
-      where: { id },
+      where: { id: rating.movie_id },
       data: {
         total_number_ratings: {
           decrement: 1,

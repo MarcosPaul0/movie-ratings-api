@@ -92,6 +92,18 @@ export class RatingsController {
     return response;
   }
 
+  @Get()
+  async findAll(): Promise<NestResponse> {
+    const allRatings = await this.ratingsService.findAll();
+
+    const response = new NestResponseBuilder()
+      .setStatus(HttpStatus.OK)
+      .setBody(allRatings)
+      .build();
+
+    return response;
+  }
+
   @Patch(':id')
   async update(
     @Param('id') id: string,
