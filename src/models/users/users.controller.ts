@@ -18,8 +18,8 @@ import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
 import { JwtAuthGuard } from '../../guards/jwt.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { PasswordPipe } from './password.pipe';
-import { RoleGuard } from 'src/guards/role.guard';
-import { IUserRequestData } from 'src/auth/auth.controller';
+import { RoleGuard } from '../../guards/role.guard';
+import { IUserRequestData } from '../../auth/auth.controller';
 
 @ApiTags('Users')
 @Controller('users')

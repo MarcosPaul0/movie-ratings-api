@@ -6,34 +6,29 @@ import {
 } from '@nestjs/common';
 import { EncryptData } from '../../utils/encrypt-data';
 import { AuthService } from '../../auth/auth.service';
-import { PrismaService } from '../../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { UsersRepository } from './repository/user.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly prismaService: PrismaService,
+    private readonly usersRepository: UsersRepository,
     private readonly authService: AuthService,
     private readonly encryptData: EncryptData,
   ) {}
 
   async create({ username, email, password }: CreateUserDto): Promise<User> {
-    const userAlreadyExists = await this.prismaService.user.findFirst({
-      where: { email },
-    });
+    const userAlreadyExists = await this.usersRepository.findByEmail(email);
 
     if (userAlreadyExists) {
       if (userAlreadyExists.deleted_at) {
-        const activeUser = await this.prismaService.user.update({
-          where: { email },
-          data: {
-            username,
-            email,
-            password,
-            deleted_at: null,
-          },
+        const activeUser = await this.usersRepository.updateByEmail(email, {
+          username,
+          email,
+          password,
+          deleted_at: null,
         });
 
         await this.authService.sendConfirmationAccountMail({
@@ -51,12 +46,10 @@ export class UsersService {
       });
     }
 
-    const newUser = await this.prismaService.user.create({
-      data: {
-        username,
-        email,
-        password,
-      },
+    const newUser = await this.usersRepository.create({
+      username,
+      email,
+      password,
     });
 
     await this.authService.sendConfirmationAccountMail({
@@ -69,17 +62,13 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    const allUsers = await this.prismaService.user.findMany({
-      where: { deleted_at: null },
-    });
+    const allUsers = await this.usersRepository.findAll();
 
     return allUsers.map((user) => new User(user));
   }
 
   async findById(id: string): Promise<User> {
-    const user = await this.prismaService.user.findFirst({
-      where: { id, deleted_at: null },
-    });
+    const user = await this.usersRepository.findById(id);
 
     if (!user) {
       throw new NotFoundException({
@@ -95,12 +84,7 @@ export class UsersService {
     id: string,
     { username, email, password }: UpdateUserDto,
   ): Promise<User> {
-    const user = await this.prismaService.user.findFirst({
-      where: {
-        id,
-        deleted_at: null,
-      },
-    });
+    const user = await this.usersRepository.findById(id);
 
     if (!user) {
       throw new NotFoundException({
@@ -113,13 +97,10 @@ export class UsersService {
       ? await this.encryptData.encrypt(password, 10)
       : undefined;
 
-    const updatedUser = await this.prismaService.user.update({
-      where: { id },
-      data: {
-        username,
-        email,
-        password: password && passwordHash,
-      },
+    const updatedUser = await this.usersRepository.updateById(id, {
+      username,
+      email,
+      password: password && passwordHash,
     });
 
     return new User(updatedUser);
@@ -127,10 +108,7 @@ export class UsersService {
 
   async remove(id: string): Promise<User> {
     try {
-      const deletedUser = await this.prismaService.user.update({
-        where: { id },
-        data: { deleted_at: new Date(), is_active: false },
-      });
+      const deletedUser = await this.usersRepository.softDelete(id);
 
       return new User(deletedUser);
     } catch (error) {
