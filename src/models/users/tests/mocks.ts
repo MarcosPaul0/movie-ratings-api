@@ -2,15 +2,15 @@ import { HttpStatus } from '@nestjs/common';
 import { NestResponseBuilder } from '../../../core/http/nestResponseBuilder';
 
 export const mockCreateUserInput = {
-  username: 'Marcos',
-  email: 'marcosphip7@gmail.com',
+  username: 'test',
+  email: 'test@test.com',
   password: '123456',
 };
 
 export const mockCreateUserReturnService = {
   id: 'f7368e17-cea9-4787-8577-ad24619532b5',
-  username: 'Marcos',
-  email: 'marcosphip7@gmail.com',
+  username: 'test',
+  email: 'test@test.com',
   password: '123456',
   avatar_url: null,
   is_admin: false,
@@ -38,8 +38,8 @@ export const mockFindAllUserReturnController = new NestResponseBuilder()
   .build();
 
 export const mockUpdateUserInput = {
-  username: 'Marcos Paulo',
-  email: 'marcosphip07@gmail.com',
+  username: 'test',
+  email: 'test1@test.com',
 };
 
 export const mockUpdateUserReturnService = {

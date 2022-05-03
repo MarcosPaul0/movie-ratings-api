@@ -2,7 +2,6 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EncryptData } from '../../../utils/encrypt-data';
 import { AuthService } from '../../../auth/auth.service';
-import { PrismaService } from '../../../prisma/prisma.service';
 import { UsersService } from '../users.service';
 import {
   mockCreateUserInput,
@@ -11,27 +10,29 @@ import {
   mockUpdateUserInput,
   mockUpdateUserReturnService,
 } from './mocks';
+import { UsersRepository } from '../repository/user.repository';
 
 describe('UsersService', () => {
   let usersService: UsersService;
-  let prismaService: PrismaService;
   let authService: AuthService;
+  let usersRepository: UsersRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
         {
-          provide: PrismaService,
+          provide: UsersRepository,
           useValue: {
-            user: {
-              create: jest.fn().mockReturnValue(mockCreateUserReturnService),
-              findFirst: jest.fn().mockReturnValue(mockCreateUserReturnService),
-              findMany: jest
-                .fn()
-                .mockReturnValue([mockCreateUserReturnService]),
-              update: jest.fn().mockReturnValue(mockUpdateUserReturnService),
-            },
+            create: jest.fn().mockReturnValue(mockCreateUserReturnService),
+            findByEmail: jest.fn().mockReturnValue(mockCreateUserReturnService),
+            findAll: jest.fn().mockReturnValue([mockCreateUserReturnService]),
+            updateByEmail: jest
+              .fn()
+              .mockReturnValue(mockUpdateUserReturnService),
+            findById: jest.fn().mockReturnValue(mockCreateUserReturnService),
+            updateById: jest.fn().mockReturnValue(mockUpdateUserReturnService),
+            softDelete: jest.fn().mockReturnValue(mockRemoveUserReturnService),
           },
         },
         {
@@ -53,20 +54,20 @@ describe('UsersService', () => {
     }).compile();
 
     usersService = module.get<UsersService>(UsersService);
-    prismaService = module.get<PrismaService>(PrismaService);
     authService = module.get<AuthService>(AuthService);
+    usersRepository = module.get<UsersRepository>(UsersRepository);
   });
 
   it('should be defined', () => {
     expect(usersService).toBeDefined();
-    expect(prismaService).toBeDefined();
     expect(authService).toBeDefined();
+    expect(usersRepository).toBeDefined();
   });
 
   describe('Create User', () => {
     it('should be create user return successfully value', async () => {
       jest
-        .spyOn(prismaService.user, 'findFirst')
+        .spyOn(usersRepository, 'findByEmail')
         .mockResolvedValueOnce(undefined);
 
       const response = await usersService.create(mockCreateUserInput);
@@ -77,11 +78,11 @@ describe('UsersService', () => {
 
     it('should be active user return successfully value', async () => {
       jest
-        .spyOn(prismaService.user, 'findFirst')
+        .spyOn(usersRepository, 'findByEmail')
         .mockResolvedValueOnce(mockRemoveUserReturnService);
 
       jest
-        .spyOn(prismaService.user, 'update')
+        .spyOn(usersRepository, 'updateByEmail')
         .mockResolvedValueOnce(mockCreateUserReturnService);
 
       const response = await usersService.create(mockCreateUserInput);
@@ -112,9 +113,7 @@ describe('UsersService', () => {
     });
 
     it('should be find one user throw error not found', async () => {
-      jest
-        .spyOn(prismaService.user, 'findFirst')
-        .mockResolvedValueOnce(undefined);
+      jest.spyOn(usersRepository, 'findById').mockResolvedValueOnce(undefined);
 
       await expect(usersService.findById('ugevfkhbwek')).rejects.toEqual(
         new NotFoundException('User not found'),
@@ -133,9 +132,7 @@ describe('UsersService', () => {
     });
 
     it('should be update user throw error not found', async () => {
-      jest
-        .spyOn(prismaService.user, 'findFirst')
-        .mockResolvedValueOnce(undefined);
+      jest.spyOn(usersRepository, 'findById').mockResolvedValueOnce(undefined);
 
       await expect(
         usersService.update('ugevfkhbwek', mockUpdateUserInput),
@@ -146,7 +143,7 @@ describe('UsersService', () => {
   describe('Delete User', () => {
     it('should be delete user return successfully value', async () => {
       jest
-        .spyOn(prismaService.user, 'update')
+        .spyOn(usersRepository, 'softDelete')
         .mockResolvedValueOnce(mockRemoveUserReturnService);
 
       const response = await usersService.remove('ugevfkhbwek');
@@ -156,7 +153,7 @@ describe('UsersService', () => {
 
     it('should be delete user throw error not found', async () => {
       jest
-        .spyOn(prismaService.user, 'update')
+        .spyOn(usersRepository, 'softDelete')
         .mockRejectedValueOnce(new Error());
 
       await expect(usersService.remove('ugevfkhbwek')).rejects.toEqual(
