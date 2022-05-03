@@ -1,9 +1,9 @@
-version: '3.3'
+version: '3.8'
 
 services:
   db:
     image: postgres
-    container_name: postgres_container
+    container_name: postgres_api_container
     restart: always
     ports:
       - 5432:5432
@@ -32,13 +32,13 @@ services:
     container_name: movie_rating_container
     restart: always
     volumes:
-      - .:/urs/app
+      - .:/usr/app
     ports:
       - 3333:3333
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgresql://postgres:123@postgres_container:5432/movies_ratings
+      DATABASE_URL: postgresql://postgres:123@postgres_api_container:5432/movies_ratings
       SECRET_TOKEN_KEY: ab73bb5bcbdf28acacfeebfef9dc7fb1
     networks:
       - app-net
