@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
@@ -9,9 +9,13 @@ import { IUsersRepository } from './i-users-repository';
 export class UsersRepository implements IUsersRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create({ email, password, username }: CreateUserDto): Promise<User> {
     const newUser = await this.prismaService.user.create({
-      data: createUserDto,
+      data: {
+        email,
+        password,
+        username,
+      },
     });
 
     return newUser;
@@ -41,10 +45,18 @@ export class UsersRepository implements IUsersRepository {
     return allUsers;
   }
 
-  async updateById(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async updateById(
+    id: string,
+    { username, email, password, is_active }: UpdateUserDto,
+  ): Promise<User> {
     const updatedUser = await this.prismaService.user.update({
       where: { id },
-      data: updateUserDto,
+      data: {
+        username,
+        email,
+        password,
+        is_active,
+      },
     });
 
     return updatedUser;
@@ -52,11 +64,15 @@ export class UsersRepository implements IUsersRepository {
 
   async updateByEmail(
     email: string,
-    updateUserDto: UpdateUserDto,
+    { username, email: newEmail, password }: UpdateUserDto,
   ): Promise<User> {
     const updatedUser = await this.prismaService.user.update({
       where: { email },
-      data: updateUserDto,
+      data: {
+        username,
+        email: newEmail,
+        password,
+      },
     });
 
     return updatedUser;
