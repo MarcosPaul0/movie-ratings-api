@@ -62,7 +62,7 @@ describe('MoviesController', () => {
 
   describe('Find Movie By Name', () => {
     it('should be find one movie return successfully value', async () => {
-      const response = await moviesController.findByName('test');
+      const response = await moviesController.findByName({ name: 'test' });
 
       expect(response).toEqual(mockFindOneMovieReturnController);
     });
@@ -72,7 +72,9 @@ describe('MoviesController', () => {
         .spyOn(moviesService, 'findByName')
         .mockRejectedValueOnce(new Error());
 
-      expect(moviesController.findByName('test')).rejects.toThrowError();
+      expect(
+        moviesController.findByName({ name: 'test' }),
+      ).rejects.toThrowError();
     });
   });
 

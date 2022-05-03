@@ -12,6 +12,8 @@ export const mockCreateMovieInput = {
 export const mockCreateMovieReturnService = {
   id: 'astkajrgpewoih087',
   ...mockCreateMovieInput,
+  total_number_ratings: 0,
+  total_rating: 0,
   created_at: new Date(),
   updated_at: new Date(),
   deleted_at: null,
