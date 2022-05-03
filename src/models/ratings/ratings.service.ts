@@ -4,10 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { MoviesRepository } from '../movies/repository/movies-repository';
 import { CreateRatingDto } from './dto/create-rating.dto';
 import { UpdateRatingDto } from './dto/update-rating.dto';
 import { Rating } from './entities/rating.entity';
+import { RatingsRepository } from './repository/ratings-repository';
 interface UserRequestData {
   id: string;
   username: string;
@@ -17,33 +18,30 @@ interface UserRequestData {
 }
 @Injectable()
 export class RatingsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly moviesRepository: MoviesRepository,
+    private readonly ratingsRepository: RatingsRepository,
+  ) {}
 
   async create({ score, user_id, movie_id }: CreateRatingDto): Promise<Rating> {
-    const ratingAlreadyExists = await this.prismaService.rating.findFirst({
-      where: { user_id, movie_id },
-    });
+    const ratingAlreadyExists = await this.ratingsRepository.findByUserAndMovie(
+      user_id,
+      movie_id,
+    );
 
     if (ratingAlreadyExists) {
       if (ratingAlreadyExists.deleted_at) {
-        const newRating = await this.prismaService.rating.update({
-          where: { id: ratingAlreadyExists.id },
-          data: {
+        const newRating = await this.ratingsRepository.updateById(
+          ratingAlreadyExists.id,
+          {
             score,
             user_id,
             movie_id,
             deleted_at: null,
           },
-        });
+        );
 
-        await this.prismaService.movie.update({
-          where: { id: movie_id },
-          data: {
-            total_rating: {
-              increment: score,
-            },
-          },
-        });
+        await this.moviesRepository.updateStatisticData(movie_id, 1, score);
 
         return newRating;
       }
@@ -54,36 +52,19 @@ export class RatingsService {
       });
     }
 
-    const newRating = await this.prismaService.rating.create({
-      data: {
-        score,
-        user_id,
-        movie_id,
-      },
+    const newRating = await this.ratingsRepository.create({
+      score,
+      user_id,
+      movie_id,
     });
 
-    await this.prismaService.movie.update({
-      where: { id: movie_id },
-      data: {
-        total_number_ratings: {
-          increment: 1,
-        },
-        total_rating: {
-          increment: score,
-        },
-      },
-    });
+    await this.moviesRepository.updateStatisticData(movie_id, 1, score);
 
     return newRating;
   }
 
   async findByUserId(user_id: string): Promise<Rating[]> {
-    const allRatings = await this.prismaService.rating.findMany({
-      where: {
-        user_id: user_id,
-        deleted_at: null,
-      },
-    });
+    const allRatings = await this.ratingsRepository.findByUserId(user_id);
 
     if (allRatings.length === 0 || !allRatings) {
       throw new NotFoundException({
@@ -96,9 +77,7 @@ export class RatingsService {
   }
 
   async findOne(id: string): Promise<Rating> {
-    const rating = await this.prismaService.rating.findFirst({
-      where: { id, deleted_at: null },
-    });
+    const rating = await this.ratingsRepository.findById(id);
 
     if (!rating) {
       throw new NotFoundException({
@@ -111,9 +90,7 @@ export class RatingsService {
   }
 
   async findAll(): Promise<Rating[]> {
-    const allRatings = this.prismaService.rating.findMany({
-      where: { deleted_at: null },
-    });
+    const allRatings = this.ratingsRepository.findAll();
 
     return allRatings;
   }
@@ -123,13 +100,7 @@ export class RatingsService {
     id: string,
     { score }: UpdateRatingDto,
   ): Promise<Rating> {
-    const rating = await this.prismaService.rating.findFirst({
-      where: {
-        id,
-        user_id: user.id,
-        deleted_at: null,
-      },
-    });
+    const rating = await this.ratingsRepository.findByIdAndUser(id, user.id);
 
     if (!rating) {
       throw new NotFoundException({
@@ -138,27 +109,21 @@ export class RatingsService {
       });
     }
 
-    const updatedRating = await this.prismaService.rating.update({
-      where: { id },
-      data: { score },
+    const updatedRating = await this.ratingsRepository.updateById(id, {
+      score,
     });
 
-    await this.prismaService.movie.update({
-      where: { id: rating.movie_id },
-      data: {
-        total_rating: {
-          increment: score - rating.score,
-        },
-      },
-    });
+    await this.moviesRepository.updateStatisticData(
+      rating.movie_id,
+      0,
+      score - rating.score,
+    );
 
     return updatedRating;
   }
 
   async remove(id: string, user_id: string): Promise<Rating> {
-    const rating = await this.prismaService.rating.findFirst({
-      where: { id, user_id, deleted_at: null },
-    });
+    const rating = await this.ratingsRepository.findByIdAndUser(id, user_id);
 
     if (!rating) {
       throw new NotFoundException({
@@ -167,22 +132,13 @@ export class RatingsService {
       });
     }
 
-    const deletedRating = await this.prismaService.rating.update({
-      where: { id },
-      data: { deleted_at: new Date() },
-    });
+    const deletedRating = await this.ratingsRepository.softDelete(id);
 
-    await this.prismaService.movie.update({
-      where: { id: rating.movie_id },
-      data: {
-        total_number_ratings: {
-          decrement: 1,
-        },
-        total_rating: {
-          decrement: rating.score,
-        },
-      },
-    });
+    await this.moviesRepository.updateStatisticData(
+      rating.movie_id,
+      -1,
+      -rating.score,
+    );
 
     return deletedRating;
   }
