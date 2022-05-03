@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -26,8 +23,20 @@ model User {
   favorite_movie String?
 
   ratings Rating[]
+  refresh_token RefreshToken?
 
   @@map("users")
+}
+
+model RefreshToken {
+  id String @id() @default(uuid())
+  user_email String
+  expires_in Int
+  
+  user User @relation(fields: [user_id], references: [id])
+  user_id String
+
+  @@map("refresh_token")
 }
 
 model Movie {
