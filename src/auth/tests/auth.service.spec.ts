@@ -1,52 +1,129 @@
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { MailService } from '../../mail/mail.service';
+import { SendMailService } from '../../mail/send-mail.service';
 import { EncryptData } from '../../utils/encrypt-data';
-import { PrismaService } from '../../prisma/prisma.service';
 import { AuthService } from '../auth.service';
+import { mockCreateUserReturnService } from '../../models/users/tests/mocks';
+import {
+  mockAuthenticateInput,
+  mockLoginInput,
+  mockLoginReturn,
+  mockRefreshToken,
+  mockToken,
+} from './mocks';
+import { GenerateToken } from '../../providers/generate-token';
+import { UsersRepository } from '../../models/users/repository/user.repository';
+import { GenerateRefreshToken } from '../../providers/generate-refresh-token';
+import { RefreshTokenRepository } from '../repository/refresh-token-repository';
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let prismaService: PrismaService;
   let jwtService: JwtService;
-  let mailService: MailService;
-  let encryptDate: EncryptData;
+  let sendMailService: SendMailService;
+  let encryptData: EncryptData;
+  let usersRepository: UsersRepository;
+  let refreshTokenRepository: RefreshTokenRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         {
-          provide: PrismaService,
-          useValue: {},
-        },
-        {
           provide: JwtService,
-          useValue: {},
+          useValue: {
+            sign: jest.fn().mockReturnValue(mockToken),
+          },
         },
         {
-          provide: MailService,
+          provide: SendMailService,
           useValue: {},
         },
         {
           provide: EncryptData,
-          useValue: {},
+          useValue: {
+            decrypt: jest.fn().mockReturnValue(true),
+          },
+        },
+        {
+          provide: GenerateToken,
+          useValue: {
+            generate: jest.fn().mockReturnValue(mockToken),
+          },
+        },
+        {
+          provide: GenerateRefreshToken,
+          useValue: {
+            generate: jest.fn().mockReturnValue(mockRefreshToken),
+          },
+        },
+        {
+          provide: UsersRepository,
+          useValue: {
+            findByEmail: jest.fn().mockReturnValue(mockCreateUserReturnService),
+            findById: jest.fn().mockReturnValue(mockCreateUserReturnService),
+            updateById: jest.fn().mockReturnValue(mockCreateUserReturnService),
+          },
+        },
+        {
+          provide: RefreshTokenRepository,
+          useValue: {
+            deleteByEmail: jest.fn().mockReturnValue(mockRefreshToken),
+            findById: jest.fn().mockReturnValue(mockRefreshToken),
+          },
         },
       ],
     }).compile();
 
     authService = module.get<AuthService>(AuthService);
-    prismaService = module.get<PrismaService>(PrismaService);
     jwtService = module.get<JwtService>(JwtService);
-    mailService = module.get<MailService>(MailService);
-    encryptDate = module.get<EncryptData>(EncryptData);
+    sendMailService = module.get<SendMailService>(SendMailService);
+    encryptData = module.get<EncryptData>(EncryptData);
+    usersRepository = module.get<UsersRepository>(UsersRepository);
+    refreshTokenRepository = module.get<RefreshTokenRepository>(
+      RefreshTokenRepository,
+    );
   });
 
   it('should be defined', () => {
     expect(authService).toBeDefined();
-    expect(prismaService).toBeDefined();
     expect(jwtService).toBeDefined();
-    expect(mailService).toBeDefined();
-    expect(encryptDate).toBeDefined();
+    expect(sendMailService).toBeDefined();
+    expect(encryptData).toBeDefined();
+    expect(usersRepository).toBeDefined();
+    expect(refreshTokenRepository).toBeDefined();
+  });
+
+  describe('Authenticate', () => {
+    it('should be authenticate return successfully value', async () => {
+      const response = await authService.authenticate(mockAuthenticateInput);
+
+      expect(response).toEqual(mockCreateUserReturnService);
+    });
+
+    it('should be authenticate throw error invalid email', async () => {
+      jest
+        .spyOn(usersRepository, 'findByEmail')
+        .mockResolvedValueOnce(undefined);
+
+      const response = await authService.authenticate(mockAuthenticateInput);
+
+      expect(response).toEqual(false);
+    });
+
+    it('should be authenticate throw error invalid password', async () => {
+      jest.spyOn(encryptData, 'decrypt').mockResolvedValueOnce(false);
+
+      const response = await authService.authenticate(mockAuthenticateInput);
+
+      expect(response).toEqual(false);
+    });
+  });
+
+  describe('Login', () => {
+    it('should be login return successfully value', async () => {
+      const response = await authService.login(mockLoginInput);
+
+      expect(response).toEqual(mockLoginReturn);
+    });
   });
 });

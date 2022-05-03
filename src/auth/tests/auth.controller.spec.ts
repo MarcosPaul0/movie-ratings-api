@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { mockUser } from '../../models/ratings/tests/mocks';
-import { mockCreateUserReturnService } from '../../models/users/tests/mocks';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
 import {
   mockLoginReturnController,
   mockReceivedConfirmationAccountMailReturnController,
+  mockReceivedConfirmationAccountMailReturnService,
   mockToken,
 } from './mocks';
 
@@ -23,7 +23,9 @@ describe('AuthController', () => {
             login: jest.fn().mockReturnValue(mockToken),
             receivedConfirmationAccountMail: jest
               .fn()
-              .mockReturnValue(mockCreateUserReturnService),
+              .mockReturnValue(
+                mockReceivedConfirmationAccountMailReturnService,
+              ),
           },
         },
       ],
