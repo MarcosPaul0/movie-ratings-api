@@ -4,14 +4,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entities/movie.entity';
+import { MoviesRepository } from './repository/movies-repository';
 
 @Injectable()
 export class MoviesService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly moviesRepository: MoviesRepository) {}
 
   async create({
     name,
@@ -20,14 +20,12 @@ export class MoviesService {
     budget,
     launched_at,
   }: CreateMovieDto): Promise<Movie> {
-    const movieAlreadyExists = await this.prismaService.movie.findFirst({
-      where: {
-        name: name.toLowerCase(),
+    const movieAlreadyExists =
+      await this.moviesRepository.findByNameDirectionLaunched(
+        name,
         direction,
-        launched_at: new Date(launched_at),
-        deleted_at: null,
-      },
-    });
+        launched_at,
+      );
 
     if (movieAlreadyExists) {
       throw new BadRequestException({
@@ -36,36 +34,25 @@ export class MoviesService {
       });
     }
 
-    const newMovie = await this.prismaService.movie.create({
-      data: {
-        name: name.toLowerCase(),
-        direction,
-        genre,
-        budget,
-        launched_at,
-      },
+    const newMovie = await this.moviesRepository.create({
+      name,
+      direction,
+      genre,
+      budget,
+      launched_at,
     });
 
     return newMovie;
   }
 
   async findAll(): Promise<Movie[]> {
-    const allMovies = await this.prismaService.movie.findMany({
-      where: { deleted_at: null },
-    });
+    const allMovies = await this.moviesRepository.findAll();
 
     return allMovies;
   }
 
   async findByName(name: string): Promise<Movie[]> {
-    const movies = await this.prismaService.movie.findMany({
-      where: {
-        name: {
-          contains: name.toLowerCase(),
-        },
-        deleted_at: null,
-      },
-    });
+    const movies = await this.moviesRepository.findByName(name);
 
     if (movies.length === 0 || !movies) {
       throw new NotFoundException({
@@ -81,35 +68,28 @@ export class MoviesService {
     id: string,
     { name, genre, direction, launched_at, budget }: UpdateMovieDto,
   ): Promise<Movie> {
-    const movieFound = await this.prismaService.movie.findFirst({
-      where: { id, deleted_at: null },
-    });
+    const movie = await this.moviesRepository.findById(id);
 
-    if (!movieFound) {
+    if (!movie) {
       throw new NotFoundException({
         statusCode: HttpStatus.NOT_FOUND,
         message: 'Movie not found',
       });
     }
 
-    const updatedMovie = await this.prismaService.movie.update({
-      where: { id },
-      data: {
-        name: name?.toLowerCase(),
-        genre,
-        direction,
-        launched_at,
-        budget,
-      },
+    const updatedMovie = await this.moviesRepository.updateById(id, {
+      name,
+      genre,
+      direction,
+      launched_at,
+      budget,
     });
 
     return updatedMovie;
   }
 
   async remove(id: string): Promise<Movie> {
-    const movieFound = await this.prismaService.movie.findFirst({
-      where: { id, deleted_at: null },
-    });
+    const movieFound = await this.moviesRepository.findById(id);
 
     if (!movieFound) {
       throw new NotFoundException({
@@ -118,10 +98,7 @@ export class MoviesService {
       });
     }
 
-    const deletedMovie = await this.prismaService.movie.update({
-      where: { id },
-      data: { deleted_at: new Date() },
-    });
+    const deletedMovie = await this.moviesRepository.softDelete(id);
 
     return deletedMovie;
   }

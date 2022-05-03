@@ -16,7 +16,7 @@ import { NestResponse } from '../../core/http/nestResponse';
 import { NestResponseBuilder } from '../../core/http/nestResponseBuilder';
 import { JwtAuthGuard } from '../../guards/jwt.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RoleGuard } from 'src/guards/role.guard';
+import { RoleGuard } from '../../guards/role.guard';
 import { FindByNameDto } from './dto/find-by-name.dto';
 
 @ApiTags('Movies')
